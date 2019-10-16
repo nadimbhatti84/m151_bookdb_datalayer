@@ -1,5 +1,15 @@
 package ch.bzz.book.data;
 
+import ch.bzz.book.service.Config;
+
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 /**
  * data access for book entity
  * <p>
@@ -12,16 +22,61 @@ package ch.bzz.book.data;
 public class BookDao {
 
     /**
-     * TODO
+     * count all books in table Book
      *
-     * @return
+     * @return number of books
      */
     public Integer count() {
 
-        // TODO establish connection
+        Connection connection;
+        String jdbcRessource = Config.getProperty("jdbcRessource");
+        try {
+            InitialContext initialContext = new InitialContext();
+            DataSource dataSource = (DataSource) initialContext.lookup(jdbcRessource);
+            connection = dataSource.getConnection();
 
-        // TODO count books in database
+        } catch (NamingException nameEx) {
+            nameEx.printStackTrace();
+            throw new RuntimeException();
+        } catch (SQLException sqlEx) {
+            sqlEx.printStackTrace();
+            throw new RuntimeException();
+        }
 
-        return -93; // FIXME return the number of books
+        PreparedStatement prepStmt = null;
+        ResultSet resultSet = null;
+        String sqlQuery;
+        int bookCount = 0;
+        try {
+            sqlQuery = "SELECT COUNT(bookUUID)" +
+                    "   FROM Book";
+            prepStmt = connection.prepareStatement(sqlQuery);
+            resultSet = prepStmt.executeQuery();
+            if (resultSet.next()) {
+                bookCount = resultSet.getInt(1);
+            }
+
+
+        } catch (SQLException sqlEx) {
+
+            sqlEx.printStackTrace();
+            throw new RuntimeException();
+        } finally {
+
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+                if (prepStmt != null)
+                    prepStmt.close();
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException sqlEx) {
+                sqlEx.printStackTrace();
+                throw new RuntimeException();
+            }
+
+
+            return bookCount;
+        }
     }
 }
