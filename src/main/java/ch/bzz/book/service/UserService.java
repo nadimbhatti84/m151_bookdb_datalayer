@@ -45,16 +45,16 @@ public class UserService {
         User user = userDao.getEntity(filter);
 
         int httpStatus;
-        String tokenData;
+        Map<String,String> claimMap = new HashMap<>();
         if (user.getUserRole().equals("guest")) {
             httpStatus = 401;
-            tokenData = null;
         } else {
             httpStatus = 200;
-            tokenData = user.getUserName() + ";" + user.getUserRole();
+            claimMap.put("userName", user.getUserName());
+            claimMap.put("userRole", user.getUserRole());
         }
 
-        NewCookie tokenCookie = TokenHandler.buildCookie(tokenData);
+        NewCookie tokenCookie = new TokenHandler().buildCookie(claimMap);
         return Response
                 .status(httpStatus)
                 .entity("")
@@ -73,7 +73,7 @@ public class UserService {
     public Response logoff(
     ) {
         int httpStatus = 200;
-        NewCookie tokenCookie = TokenHandler.buildCookie(null);
+        NewCookie tokenCookie = new TokenHandler().buildCookie(null);
         return Response
                 .status(httpStatus)
                 .entity("")
@@ -98,12 +98,10 @@ public class UserService {
         Map<String, String> userData = new HashMap<>();
 
         if (token != null) {
-            Map<String, String> claimMap = TokenHandler.readClaims(token);
-            String tokenData = claimMap.getOrDefault("subject", null);
-            if (tokenData != null) {
-                String[] data = tokenData.split(";");
-                userData.put("username", data[0]);
-                userData.put("userRole", data[1]);
+            Map<String, String> claimMap = new TokenHandler().readClaims(token);
+            if (claimMap != null && !claimMap.isEmpty()) {
+                userData.put("userName", claimMap.get("userName"));
+                userData.put("userRole", claimMap.get("userRole"));
             }
         }
 

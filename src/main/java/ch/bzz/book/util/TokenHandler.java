@@ -1,10 +1,7 @@
 package ch.bzz.book.util;
 
 import ch.bzz.book.service.Config;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
 import javax.crypto.Cipher;
@@ -30,68 +27,13 @@ import java.util.Map;
 public class TokenHandler {
 
     /**
-     * builds the token
-     *
-     * @param data     the token data
-     * @param duration the duration of this token in minutes
-     * @param role     the user role ("user" or "admin")
-     * @return JSON web token as String
+     * builds a NewCookie with the json web token
+     * @param claimMap  a map with the token data
+     * @return the NewCookie
      */
-    private static String buildToken(String data, int duration, String role) {
-        byte[] keyBytes = Config.getProperty("jwtSecret").getBytes(StandardCharsets.UTF_8);
-        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
-        Date now = new Date();
-        Date expiration = new Date(now.getTime() + duration * 60000);
-        return Jwts.builder()
-                .setIssuer("BookDAO")
-                .setSubject(encrypt(data, getJwtEncrypt()))
-                .claim("role", encrypt(role, getJwtEncrypt()))
-                .setExpiration(expiration)
-                .setIssuedAt(now)
-                .signWith(secretKey)
-                .compact();
-    }
-
-    /**
-     * reads all claims from the token
-     *
-     * @param token JSON web token
-     * @return claims as a map
-     */
-    public static Map<String, String> readClaims(String token) {
-        Map<String, String> claimMap = new HashMap<>();
-        Jws<Claims> jwsClaims;
-        byte[] keyBytes = Config.getProperty("jwtSecret").getBytes(StandardCharsets.UTF_8);
-        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
-        try {
-            jwsClaims = Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(token);
-            claimMap.put(
-                    "subject",
-                    decrypt(
-                            jwsClaims.getBody().getSubject(),
-                            getJwtEncrypt()
-                    )
-            );
-
-
-        } catch (JwtException ex) {
-            ex.printStackTrace();
-            System.out.println(ex.getCause());
-        }
-        return claimMap;
-    }
-
-    /**
-     * build a cookie with a jwtoken
-     *
-     * @param tokenData the data to be stored in the cookie
-     * @return NewCookie
-     */
-    public static NewCookie buildCookie(String tokenData) {
+    public NewCookie buildCookie(Map<String,String> claimMap) {
         NewCookie newCookie;
-        if (tokenData == null) {
+        if (claimMap == null || claimMap.isEmpty()) {
             newCookie = new NewCookie(
                     "jwtoken",
                     "",
@@ -103,24 +45,87 @@ public class TokenHandler {
                     false
             );
         } else {
-            String token = buildToken(
-                    tokenData,
-                    10,
-                    "admin");
-
             newCookie = new NewCookie(
                     "jwtoken",
-                    token,
+                    buildToken(claimMap, 10),
                     "/",
                     Config.getProperty("cookieDomain"),
                     "Auth-Token",
-                    6000,
+                    60,
                     Boolean.parseBoolean(Config.getProperty("cookieSecure")),
                     false
             );
         }
 
         return newCookie;
+    }
+
+    /**
+     * reads all claims from the token
+     *
+     * @param token JSON web token
+     * @return claims as a map
+     */
+    public Map<String, String> readClaims(String token) {
+        Map<String, String> claimMap = new HashMap<>();
+        Jws<Claims> jwsClaims;
+        byte[] keyBytes = Config.getProperty("jwtSecret").getBytes(StandardCharsets.UTF_8);
+        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
+        try {
+            jwsClaims = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token);
+            claimMap.put(
+                    "userName",
+                    decrypt(
+                            jwsClaims.getBody().get("userName").toString(),
+                            getJwtEncrypt()
+                    )
+            );
+            claimMap.put(
+                    "userRole",
+                    decrypt(
+                            jwsClaims.getBody().get("userRole").toString(),
+                            getJwtEncrypt()
+                    )
+            );
+
+        } catch (JwtException ex) {
+            ex.printStackTrace();
+            System.out.println(ex.getCause());
+        }
+        return claimMap;
+    }
+
+    /**
+     * builds the token
+     *
+     * @param claimMap     a map with the token claims
+     * @param duration the duration of this token in minutes)
+     * @return JSON web token as String
+     */
+    private String buildToken(Map<String,String> claimMap, int duration) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + duration * 60000);
+
+        JwtBuilder jwtBuilder= Jwts.builder()
+                .setIssuer("BookDB")
+                .setSubject("authentication")
+                .setExpiration(expiration)
+                .setIssuedAt(now);
+
+        for (Map.Entry<String, String> entry : claimMap.entrySet()) {
+            jwtBuilder = jwtBuilder.claim(
+                    entry.getKey(),
+                    encrypt(entry.getValue(), getJwtEncrypt())
+            );
+        }
+
+        byte[] keyBytes = Config.getProperty("jwtSecret").getBytes(StandardCharsets.UTF_8);
+        SecretKey secretKey = Keys.hmacShaKeyFor(keyBytes);
+        return jwtBuilder
+                .signWith(secretKey)
+                .compact();
     }
 
     /**
