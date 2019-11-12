@@ -17,9 +17,7 @@ import java.util.List;
  * <p>
  * M151: BookDB
  *
- * @author Marcel Suter
- * @version 1.0
- * @since 2019-10-13
+ * @author Marcel Suter (Ghwalin)
  */
 @Path("bookshelf")
 public class BookService {

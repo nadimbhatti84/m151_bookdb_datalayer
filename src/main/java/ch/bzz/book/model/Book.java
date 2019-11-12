@@ -1,38 +1,55 @@
 package ch.bzz.book.model;
 
+import ch.bzz.book.model.Publisher;
+
+import javax.ws.rs.FormParam;
 import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
  * a book in the shelf
  * <p>
- * M151: BookDB
+ * M133: Bookshelf
  *
- * @author Marcel Suter
- * @version 1.0
- * @since 2019-10-13
+ * @author Marcel Suter (Ghwalin)
  */
 public class Book {
 
     private String bookUUID;
+
+    @FormParam("title")
+    //@Size(min=5, max=40)
     private String title;
+
+    @FormParam("author")
+    //@Size(min=3, max=40)
     private String author;
-    private String publisher;
+
+    private Publisher publisher;
+
+    @FormParam("price")
+    //@DecimalMin(value="0.05")
+    //@DecimalMax(value="199.95")
     private BigDecimal price;
+
+    @FormParam("isbn")
+    //@Pattern(regexp = "(?=[0-9]{13}|[- 0-9]{17})97[89](-[0-9]{1,5}){3}-[0-9]")
     private String isbn;
 
     /**
      * default constructor
      */
     public Book() {
-        setBookUUID(UUID.randomUUID().toString());
-        setTitle(null);
+
     }
 
     /**
      * @return the bookUUID
      */
     public String getBookUUID() {
+        if (this.bookUUID == null || this.bookUUID.equals("")) {
+            setBookUUID(UUID.randomUUID().toString());
+        }
         return bookUUID;
     }
 
@@ -72,16 +89,21 @@ public class Book {
     }
 
     /**
-     * @return the publisher
+     * Gets the publisher
+     *
+     * @return value of publisher
      */
-    public String getPublisher() {
+    public Publisher getPublisher() {
         return publisher;
     }
 
     /**
-     * @param publisher the publisher to set
+     * Sets the publisher
+     *
+     * @param publisher the value to set
      */
-    public void setPublisher(String publisher) {
+
+    public void setPublisher(Publisher publisher) {
         this.publisher = publisher;
     }
 

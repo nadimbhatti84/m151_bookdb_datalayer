@@ -14,9 +14,7 @@ import java.util.Set;
  * <p>
  * M151: BookDB
  *
- * @author Marcel Suter
- * @version 1.0
- * @since 2019-10-13
+ * @author Marcel Suter (Ghwalin)
  */
 
 @ApplicationPath("/resource")
@@ -35,6 +33,7 @@ public class Config extends Application {
         HashSet providers = new HashSet<Class<?>>();
         providers.add(BookService.class);
         providers.add(UserService.class);
+        providers.add(PublisherService.class);
         return providers;
     }
 

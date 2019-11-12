@@ -1,10 +1,10 @@
 /**
  * view-controller for bookedit.html
  *
- * M151: BookDB
+ * M133: Bookshelf
  *
  * @author  Marcel Suter
- * @since   2019-10-13
+ * @since   2019-03-19
  * @version 1.0
  */
 
@@ -13,7 +13,7 @@
  */
 $(document).ready(function () {
     showMessage("empty", " ");
-    loadBook();
+    loadPublishers().done(loadBook());
 
     /**
      * listener for submitting the form
@@ -27,6 +27,29 @@ $(document).ready(function () {
         window.location.href = "./bookshelf.html";
     });
 });
+
+/**
+ * loads all publishers
+ */
+function loadPublishers() {
+    var waiting = $.Deferred();
+    $
+        .ajax({
+            url: "./resource/publisher/list",
+            dataType: "json",
+            type: "GET"
+        })
+        .done(addPublishers)
+        .fail(function (xhr, status, errorThrown) {
+            if (xhr.status == 404) {
+                showMessage("error","Kein Verlag gefunden");
+            } else {
+                window.location.href = "./bookshelf.html";
+            }
+        })
+
+    return waiting;
+}
 
 /**
  *  loads the data of this book
@@ -44,12 +67,22 @@ function loadBook() {
             .done(showBook)
             .fail(function (xhr, status, errorThrown) {
                 if (xhr.status == 404) {
-                    showMessage("warning", "Kein Buch gefunden");
+                    showMessage("error", "Kein Buch gefunden");
                 } else {
                     window.location.href = "./bookshelf.html";
                 }
             })
     }
+}
+
+/**
+ * adds all publishers to dropdown
+ * @param publisherList
+ */
+function addPublishers(publisherList) {
+    $.each(publisherList, function (index, publisher) {
+        $("#publisherUUID").append(new Option(publisher.publisher, publisher.publisherUUID));
+    });
 }
 
 /**
@@ -60,9 +93,11 @@ function showBook(book) {
     $("#message").empty();
     $("#title").val(book.title);
     $("#author").val(book.author);
-    $("#publisher").val(book.publisher);
+    $("#publisherUUID").val(book.publisher.publisherUUID);
     $("#price").val(book.price);
     $("#isbn").val(book.isbn);
+
+    $("#publisherUUID").change();
 }
 
 /**
@@ -76,19 +111,16 @@ function saveBook(form) {
             url: "./resource/bookshelf/save?uuid=" + $.urlParam('uuid'),
             dataType: "text",
             type: "POST",
-            data: $("#bookeditForm").serialize(),
+            data: $("#bookeditForm").serialize()
         })
         .done(function (jsonData) {
-            showBook(jsonData);
             window.location.href = "./bookshelf.html";
         })
         .fail(function (xhr, status, errorThrown) {
-            if (xhr.status == 403) {
-                location.href = "./login.html";
-            } else if (xhr.status == 404) {
-                showMessage("warning", "Dieses Buch existiert nicht");
+            if (xhr.status == 404) {
+                showMessage("warning","Dieses Buch existiert nicht");
             } else {
-                showMessage("alert", "Fehler beim Speichern des Buchs");
+                showMessage("error", "Fehler beim Speichern des Buchs");
             }
         })
 }
