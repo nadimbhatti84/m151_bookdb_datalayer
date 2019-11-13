@@ -15,17 +15,16 @@ import java.util.Map;
  * M151: BookDB
  *
  * @author Marcel Suter
- * @version 1.0
- * @since 2019-10-13
  */
-public class UserDao {
+public class UserDao implements Dao<User, Map<String, String>> {
 
     /**
      * search a user with the username/password
      *
      * @return the user object
      */
-    public static User getEntity(Map<String, String> filter) {
+    @Override
+    public User getEntity(Map<String, String> filter) {
         BufferedReader bufferedReader;
         FileReader fileReader;
         try {

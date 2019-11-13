@@ -1,6 +1,6 @@
 package ch.bzz.book.service;
 
-
+import ch.bzz.book.data.Dao;
 import ch.bzz.book.data.BookDao;
 import ch.bzz.book.model.Book;
 import ch.bzz.book.model.Publisher;

@@ -1,5 +1,5 @@
 package ch.bzz.book.service;
-
+import ch.bzz.book.data.Dao;
 import ch.bzz.book.data.UserDao;
 import ch.bzz.book.model.User;
 import ch.bzz.book.util.TokenHandler;
@@ -17,8 +17,6 @@ import java.util.Map;
  * M151: BookDB
  *
  * @author Marcel Suter
- * @version 1.0
- * @since 2019-10-13
  */
 @Path("user")
 public class UserService {
@@ -91,7 +89,7 @@ public class UserService {
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
     public Response authUser(
-            @CookieParam("jwtoken") String token
+            @CookieParam("token") String token
     ) {
         int httpStatus = 403;
 

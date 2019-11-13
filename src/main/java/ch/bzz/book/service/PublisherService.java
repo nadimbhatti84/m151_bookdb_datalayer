@@ -1,5 +1,6 @@
 package ch.bzz.book.service;
-
+import ch.bzz.book.data.Dao;
+import ch.bzz.book.data.PublisherDao;
 import ch.bzz.book.model.Publisher;
 
 import javax.ws.rs.CookieParam;
