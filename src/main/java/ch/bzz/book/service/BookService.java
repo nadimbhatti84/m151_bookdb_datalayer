@@ -61,7 +61,7 @@ public class BookService {
     ) {
 
         int httpStatus = 200;
-        Dao<Book> bookDao = new BookDao();
+        Dao<Book, String> bookDao = new BookDao();
         List<Book> bookList = bookDao.getAll();
         if (bookList.isEmpty())
             httpStatus = 404;
@@ -86,9 +86,8 @@ public class BookService {
             @QueryParam("uuid") String bookUUID,
             @CookieParam("token") String token
     ) {
-        Book book = new Book();
         int httpStatus = 200;
-        Dao<Book> bookDAO = new BookDao();
+        Dao<Book, String> bookDAO = new BookDao();
         Book book = bookDAO.getEntity(bookUUID);
         if (book.getTitle() == null)
             httpStatus = 404;
@@ -111,7 +110,7 @@ public class BookService {
         int httpStatus = 200;
         book.setBookUUID(bookUUID);
         book.setPublisher(publisher);
-        Dao<Book> bookDao = new BookDao();
+        Dao<Book, String> bookDao = new BookDao();
         Result result = bookDao.save(book);
         if (result != Result.SUCCESS)  httpStatus = 500;
         return Response
@@ -128,7 +127,7 @@ public class BookService {
             @CookieParam("token") String token
     ) {
         int httpStatus = 200;
-        Dao<Book> bookDao = new BookDao();
+        Dao<Book, String> bookDao = new BookDao();
         Result result = bookDao.delete(bookUUID);
         if (result != Result.SUCCESS) httpStatus = 500;
         return Response

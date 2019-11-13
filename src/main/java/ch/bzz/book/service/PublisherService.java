@@ -34,7 +34,7 @@ public class PublisherService {
             @CookieParam("token") String token
     ) {
         int httpStatus = 200;
-        Dao<Publisher> publisherDao = new PublisherDao();
+        Dao<Publisher, String> publisherDao = new PublisherDao();
         List<Publisher> publisherList = publisherDao.getAll();
         if (publisherList.isEmpty())
             httpStatus = 404;

@@ -41,6 +41,8 @@ function loadBooks() {
         .fail(function (xhr) {
             if (xhr.status == 403) {
                 location.href = "./login.html";
+            } else if (xhr.status == 404) {
+                showMessage("info", "Keine Bücher gefunden");
             } else {
                 showMessage("error", "Fehler beim Lesen der Bücher");
             }
