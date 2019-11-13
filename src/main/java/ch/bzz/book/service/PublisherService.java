@@ -1,5 +1,7 @@
 package ch.bzz.book.service;
 
+import ch.bzz.book.model.Publisher;
+
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -32,10 +34,14 @@ public class PublisherService {
             @CookieParam("token") String token
     ) {
         int httpStatus = 200;
+        Dao<Publisher> publisherDao = new PublisherDao();
+        List<Publisher> publisherList = publisherDao.getAll();
+        if (publisherList.isEmpty())
+            httpStatus = 404;
 
         return Response
                 .status(httpStatus)
-                .entity(null)
+                .entity(publisherList)
                 .build();
     }
 }

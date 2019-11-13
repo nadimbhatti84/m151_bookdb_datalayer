@@ -17,11 +17,9 @@ import java.util.Map;
 /**
  * utility for creating and reading JSON web token
  * <p>
- * M133 BookDB
+ * M151 BookDB
  *
  * @author Marcel Suter
- * @version 1.0
- * @since 2019-10-14
  */
 
 public class TokenHandler {
@@ -35,7 +33,7 @@ public class TokenHandler {
         NewCookie newCookie;
         if (claimMap == null || claimMap.isEmpty()) {
             newCookie = new NewCookie(
-                    "jwtoken",
+                    "token",
                     "",
                     "/",
                     Config.getProperty("cookieDomain"),
@@ -46,7 +44,7 @@ public class TokenHandler {
             );
         } else {
             newCookie = new NewCookie(
-                    "jwtoken",
+                    "token",
                     buildToken(claimMap, 10),
                     "/",
                     Config.getProperty("cookieDomain"),

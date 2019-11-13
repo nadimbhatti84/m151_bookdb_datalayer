@@ -3,12 +3,13 @@ package ch.bzz.book.service;
 
 import ch.bzz.book.data.BookDao;
 import ch.bzz.book.model.Book;
+import ch.bzz.book.model.Publisher;
+import ch.bzz.book.util.Result;
 
+import javax.validation.Valid;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -33,7 +34,7 @@ public class BookService {
     @Produces(MediaType.APPLICATION_JSON)
 
     public Response countBooks(
-            @CookieParam("jwtoken") String token
+            @CookieParam("token") String token
     ) {
 
         int httpStatus = 200;
@@ -56,11 +57,14 @@ public class BookService {
     @Produces(MediaType.APPLICATION_JSON)
 
     public Response listBooks(
-            @CookieParam("jwtoken") String token
+            @CookieParam("token") String token
     ) {
 
         int httpStatus = 200;
-        List<Book> bookList = new ArrayList<>();
+        Dao<Book> bookDao = new BookDao();
+        List<Book> bookList = bookDao.getAll();
+        if (bookList.isEmpty())
+            httpStatus = 404;
 
         return Response
                 .status(httpStatus)
@@ -80,10 +84,14 @@ public class BookService {
 
     public Response readBook(
             @QueryParam("uuid") String bookUUID,
-            @CookieParam("jwtoken") String token
+            @CookieParam("token") String token
     ) {
         Book book = new Book();
         int httpStatus = 200;
+        Dao<Book> bookDAO = new BookDao();
+        Book book = bookDAO.getEntity(bookUUID);
+        if (book.getTitle() == null)
+            httpStatus = 404;
 
         return Response
                 .status(httpStatus)
@@ -95,11 +103,17 @@ public class BookService {
     @Path("save")
     @Produces(MediaType.TEXT_PLAIN)
     public Response saveBook(
-            @Context Book book,
-            @CookieParam("jwtoken") String token
+            @QueryParam("uuid") String bookUUID,
+            @Valid @BeanParam Book book,
+            @Valid @BeanParam Publisher publisher,
+            @CookieParam("token") String token
     ) {
         int httpStatus = 200;
-
+        book.setBookUUID(bookUUID);
+        book.setPublisher(publisher);
+        Dao<Book> bookDao = new BookDao();
+        Result result = bookDao.save(book);
+        if (result != Result.SUCCESS)  httpStatus = 500;
         return Response
                 .status(httpStatus)
                 .entity("")
@@ -111,10 +125,12 @@ public class BookService {
     @Produces(MediaType.TEXT_PLAIN)
     public Response deleteBook(
             @QueryParam("uuid") String bookUUID,
-            @CookieParam("jwtoken") String token
+            @CookieParam("token") String token
     ) {
         int httpStatus = 200;
-
+        Dao<Book> bookDao = new BookDao();
+        Result result = bookDao.delete(bookUUID);
+        if (result != Result.SUCCESS) httpStatus = 500;
         return Response
                 .status(httpStatus)
                 .entity("")
