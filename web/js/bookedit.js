@@ -93,11 +93,11 @@ function showBook(book) {
     $("#message").empty();
     $("#title").val(book.title);
     $("#author").val(book.author);
-    $("#publisherUUID").val(book.publisher.publisherUUID);
     $("#price").val(book.price);
     $("#isbn").val(book.isbn);
-
-    $("#publisherUUID").change();
+    $("#publisherUUID")
+        .val(book.publisher.publisherUUID)
+        .change();
 }
 
 /**
@@ -106,9 +106,14 @@ function showBook(book) {
  */
 function saveBook(form) {
     form.preventDefault();
+    var uuid="";
+    if ($.urlParam('uuid') !== null) {
+        "?uuid=" + $.urlParam('uuid');
+    }
+
     $
         .ajax({
-            url: "./resource/bookshelf/save?uuid=" + $.urlParam('uuid'),
+            url: "./resource/bookshelf/save?uuid=" + uuid,
             dataType: "text",
             type: "POST",
             data: $("#bookeditForm").serialize()
