@@ -54,9 +54,17 @@ public class Book {
     }
 
     /**
+     * sets the bookUUID if valid
      * @param bookUUID the bookUUID to be set
      */
     public void setBookUUID(String bookUUID) {
+        if (bookUUID != null) {
+            try {
+                UUID.fromString(bookUUID);
+            } catch (IllegalArgumentException exception) {
+                bookUUID = null;
+            }
+        }
         this.bookUUID = bookUUID;
     }
 
