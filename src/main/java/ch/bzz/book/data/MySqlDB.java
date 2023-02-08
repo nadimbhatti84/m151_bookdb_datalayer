@@ -38,11 +38,11 @@ public class MySqlDB {
     }
 
     public static PreparedStatement getPreparedStmt() {
-        return preparedStmt;
+        return prepStmt;
     }
 
     public static void setPreparedStmt(PreparedStatement preparedStmt) {
-        MySqlDB.preparedStmt = preparedStmt;
+        MySqlDB.prepStmt = preparedStmt;
     }
 
     public static ResultSet getResultSet() {
