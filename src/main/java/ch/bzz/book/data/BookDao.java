@@ -1,5 +1,6 @@
 package ch.bzz.book.data;
 
+import ch.bzz.book.model.Book;
 import ch.bzz.book.service.Config;
 
 import javax.naming.InitialContext;
@@ -19,30 +20,17 @@ import java.sql.SQLException;
  * @version 1.0
  * @since 2019-10-13
  */
-public class BookDao {
+public class BookDao implements Dao<Book, String> {
 
     /**
      * count all books in table Book
      *
      * @return number of books
      */
+    @Override
     public Integer count() {
 
-        Connection connection;
-        String jdbcRessource = Config.getProperty("jdbcRessource");
-        try {
-            InitialContext initialContext = new InitialContext();
-            DataSource dataSource = (DataSource) initialContext.lookup(jdbcRessource);
-            connection = dataSource.getConnection();
-
-        } catch (NamingException nameEx) {
-            nameEx.printStackTrace();
-            throw new RuntimeException();
-        } catch (SQLException sqlEx) {
-            sqlEx.printStackTrace();
-            throw new RuntimeException();
-        }
-
+        Connection connection = MySqlDB.getConnection();
         PreparedStatement prepStmt = null;
         ResultSet resultSet = null;
         String sqlQuery;
@@ -63,17 +51,7 @@ public class BookDao {
             throw new RuntimeException();
         } finally {
 
-            try {
-                if (resultSet != null)
-                    resultSet.close();
-                if (prepStmt != null)
-                    prepStmt.close();
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException sqlEx) {
-                sqlEx.printStackTrace();
-                throw new RuntimeException();
-            }
+            MySqlDB.sqlClose();
 
 
             return bookCount;
